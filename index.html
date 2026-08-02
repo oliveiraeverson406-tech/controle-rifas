@@ -184,6 +184,9 @@
     height:100%;
     background: var(--ticket-red);
   }
+  .ticket.completo .bar-fill{
+    background: #0B4DE0;
+  }
   .ticket .actions{
     display:flex;
     gap:8px;
@@ -219,7 +222,7 @@
     margin-top:6px;
     font-size:19px;
     font-weight:700;
-    color: var(--ticket-red-dark);
+    color: #0B4DE0;
     letter-spacing:0.5px;
   }
   .empty{
@@ -471,7 +474,7 @@
       const pct = p.qtdDistribuida > 0 ? (p.qtdVendida / p.qtdDistribuida * 100) : 0;
 
       const el = document.createElement('div');
-      el.className = 'ticket';
+      el.className = 'ticket' + (restante === 0 ? ' completo' : '');
       el.innerHTML = `
         <div class="stub"></div>
         <div class="body">
