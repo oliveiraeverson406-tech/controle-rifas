@@ -88,6 +88,7 @@
     margin-top:2px;
   }
   .card.money .num{ color: var(--stub-green); }
+  .card.falta-card .num{ color: var(--ticket-red-dark); }
 
   .add-form{
     margin: 18px 16px 4px;
@@ -327,6 +328,10 @@
     <div class="num" id="totArrecadado">R$ 0</div>
     <div class="lbl">Arrecadado</div>
   </div>
+  <div class="card falta-card">
+    <div class="num" id="totFalta">R$ 0</div>
+    <div class="lbl">Falta Receber</div>
+  </div>
 </div>
 
 <div class="add-form">
@@ -511,6 +516,7 @@
     document.getElementById('totVendidas').textContent = totVend;
     document.getElementById('totRestantes').textContent = totDist - totVend;
     document.getElementById('totArrecadado').textContent = formatMoeda(totVend * PRECO_RIFA);
+    document.getElementById('totFalta').textContent = formatMoeda((totDist - totVend) * PRECO_RIFA);
   }
 
   render();
