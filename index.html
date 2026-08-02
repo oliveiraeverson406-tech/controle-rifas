@@ -225,6 +225,13 @@
     color: #0B4DE0;
     letter-spacing:0.5px;
   }
+  .falta{
+    display:inline-block;
+    margin-top:6px;
+    font-size:16px;
+    font-weight:600;
+    color: var(--ticket-red-dark);
+  }
   .empty{
     text-align:center;
     color:#8a7d68;
@@ -471,6 +478,7 @@
       totVend += p.qtdVendida;
       const restante = p.qtdDistribuida - p.qtdVendida;
       const valor = p.qtdVendida * PRECO_RIFA;
+      const valorFalta = restante * PRECO_RIFA;
       const pct = p.qtdDistribuida > 0 ? (p.qtdVendida / p.qtdDistribuida * 100) : 0;
 
       const el = document.createElement('div');
@@ -488,7 +496,7 @@
             <span>Restam: <b>${restante}</b></span>
           </div>
           <div class="bar"><div class="bar-fill" style="width:${pct}%"></div></div>
-          ${restante === 0 ? '<span class="esgotado">✔ TODAS VENDIDAS</span>' : ''}
+          ${restante === 0 ? '<span class="esgotado">✔ TODAS VENDIDAS</span>' : `<span class="falta">Falta receber: ${formatMoeda(valorFalta)}</span>`}
           <div class="actions">
             <button class="btn-venda" onclick="venderRifa(${p.id})" ${restante === 0 ? 'disabled' : ''}>+1 Venda</button>
             <button class="btn-editar" onclick="editarPessoa(${p.id})">Editar</button>
