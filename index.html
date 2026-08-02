@@ -1,0 +1,507 @@
+!<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Rifas</title>
+<style>
+  :root{
+    --paper: #FBF6EC;
+    --paper-dark: #F0E7D4;
+    --ink: #2A211A;
+    --ticket-red: #B3312C;
+    --ticket-red-dark: #8F2521;
+    --stub-green: #3D6B4F;
+    --line: #D8CBAE;
+    --gold: #C9A227;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    padding-bottom: 40px;
+  }
+  header{
+    background: var(--ticket-red);
+    color: #FBF6EC;
+    padding: 22px 16px 26px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::after{
+    content:"";
+    position:absolute;
+    left:0; right:0; bottom:-1px;
+    height:16px;
+    background-image: radial-gradient(circle at 8px 0, transparent 8px, var(--ticket-red) 8px);
+    background-size: 20px 16px;
+    background-position: 4px 0;
+  }
+  header h1{
+    margin:0;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 26px;
+    letter-spacing: 0.5px;
+  }
+  header p{
+    margin: 6px 0 0;
+    font-size: 13px;
+    opacity: 0.85;
+  }
+  .price-tag{
+    display:inline-block;
+    margin-top:10px;
+    background: var(--gold);
+    color: #2A211A;
+    font-weight:700;
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 3px;
+  }
+
+  .summary{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 20px 16px 4px;
+  }
+  .card{
+    background:#fff;
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    text-align:center;
+  }
+  .card .num{
+    font-family: Georgia, serif;
+    font-size: 22px;
+    font-weight:700;
+    color: var(--ticket-red-dark);
+  }
+  .card .lbl{
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color:#6b5f4d;
+    margin-top:2px;
+  }
+  .card.money .num{ color: var(--stub-green); }
+
+  .add-form{
+    margin: 18px 16px 4px;
+    background:#fff;
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .add-form h2{
+    margin:0 0 10px;
+    font-size:15px;
+    color: var(--ticket-red-dark);
+  }
+  .add-form .row{
+    display:flex;
+    gap:8px;
+  }
+  .add-form input{
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:9px 10px;
+    font-size:14px;
+    background: var(--paper);
+  }
+  .add-form input[name="nome"]{ flex:2; }
+  .add-form input[name="qtd"]{ flex:1; }
+  .add-form button{
+    margin-top:10px;
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:6px;
+    background: var(--ticket-red);
+    color:#fff;
+    font-size:14px;
+    font-weight:600;
+  }
+
+  .list{
+    margin: 18px 16px 0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .ticket{
+    background:#fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    display:flex;
+    overflow:hidden;
+  }
+  .ticket .stub{
+    width: 8px;
+    background: repeating-linear-gradient(
+      to bottom, var(--gold) 0 6px, transparent 6px 12px
+    );
+  }
+  .ticket .body{
+    flex:1;
+    padding: 12px 14px;
+  }
+  .ticket .top{
+    display:flex;
+    justify-content: space-between;
+    align-items:baseline;
+  }
+  .ticket .nome{
+    font-weight:700;
+    font-size:15px;
+  }
+  .ticket .valor{
+    font-family: Georgia, serif;
+    font-weight:700;
+    color: var(--stub-green);
+    font-size:15px;
+  }
+  .ticket .stats{
+    display:flex;
+    gap:14px;
+    margin-top:6px;
+    font-size:12px;
+    color:#6b5f4d;
+  }
+  .ticket .stats b{ color: var(--ink); }
+  .ticket .bar{
+    margin-top:8px;
+    height:6px;
+    border-radius:3px;
+    background: var(--paper-dark);
+    overflow:hidden;
+  }
+  .ticket .bar-fill{
+    height:100%;
+    background: var(--ticket-red);
+  }
+  .ticket .actions{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+  }
+  .ticket .actions button{
+    flex:1;
+    border:none;
+    border-radius:6px;
+    padding:9px 0;
+    font-size:13px;
+    font-weight:600;
+  }
+  .btn-venda{
+    background: var(--stub-green);
+    color:#fff;
+  }
+  .btn-venda:disabled{
+    background:#B9C7BC;
+    color:#fff;
+  }
+  .btn-editar{
+    background: var(--paper-dark);
+    color: var(--ink);
+  }
+  .btn-excluir{
+    background: #fff;
+    color: var(--ticket-red);
+    border:1px solid var(--ticket-red) !important;
+  }
+  .esgotado{
+    display:inline-block;
+    margin-top:6px;
+    font-size:11px;
+    font-weight:700;
+    color: var(--ticket-red-dark);
+    letter-spacing:0.5px;
+  }
+  .empty{
+    text-align:center;
+    color:#8a7d68;
+    font-size:13px;
+    padding: 30px 16px;
+  }
+
+  .backup{
+    margin: 18px 16px 4px;
+    background:#fff;
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .backup h2{
+    margin:0 0 4px;
+    font-size:15px;
+    color: var(--ticket-red-dark);
+  }
+  .backup .status{
+    font-size:12px;
+    color:#6b5f4d;
+    margin-bottom:10px;
+  }
+  .backup .row{
+    display:flex;
+    gap:8px;
+  }
+  .backup button, .backup label{
+    flex:1;
+    text-align:center;
+    padding:10px;
+    border:none;
+    border-radius:6px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .btn-backup{
+    background: var(--gold);
+    color: var(--ink);
+  }
+  .btn-restaurar{
+    background: var(--paper-dark);
+    color: var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .toast{
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform: translateX(-50%);
+    background: var(--stub-green);
+    color:#fff;
+    padding:10px 18px;
+    border-radius: 20px;
+    font-size:13px;
+    font-weight:600;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.3s;
+    z-index: 10;
+  }
+  .toast.show{
+    opacity:1;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎟️ Controle de Rifas</h1>
+  <p>Distribuição, vendas e arrecadação por pessoa</p>
+  <span class="price-tag" id="precoTag">R$ 5,00 por rifa</span>
+</header>
+
+<div class="summary">
+  <div class="card">
+    <div class="num" id="totDistribuidas">0</div>
+    <div class="lbl">Distribuídas</div>
+  </div>
+  <div class="card">
+    <div class="num" id="totVendidas">0</div>
+    <div class="lbl">Vendidas</div>
+  </div>
+  <div class="card">
+    <div class="num" id="totRestantes">0</div>
+    <div class="lbl">Restantes</div>
+  </div>
+  <div class="card money">
+    <div class="num" id="totArrecadado">R$ 0</div>
+    <div class="lbl">Arrecadado</div>
+  </div>
+</div>
+
+<div class="add-form">
+  <h2>Adicionar pessoa</h2>
+  <div class="row">
+    <input type="text" name="nome" id="inputNome" placeholder="Nome">
+    <input type="number" name="qtd" id="inputQtd" placeholder="Qtd" min="1">
+  </div>
+  <button onclick="adicionarPessoa()">+ Adicionar</button>
+</div>
+
+<div class="backup">
+  <h2>💾 Backup</h2>
+  <div class="status" id="statusSalvo">Salvo automaticamente neste aparelho</div>
+  <div class="row">
+    <button class="btn-backup" onclick="baixarBackup()">Baixar backup</button>
+    <label class="btn-restaurar" for="arquivoBackup">Restaurar backup</label>
+    <input type="file" id="arquivoBackup" accept=".json" style="display:none" onchange="restaurarBackup(event)">
+  </div>
+</div>
+
+<div class="list" id="lista"></div>
+<div class="empty" id="vazio" style="display:none;">Nenhuma pessoa cadastrada ainda.</div>
+<div class="toast" id="toast"></div>
+
+<script>
+  const PRECO_RIFA = 5;
+  let pessoas = JSON.parse(localStorage.getItem('rifas_pessoas') || '[]');
+
+  function salvar(){
+    localStorage.setItem('rifas_pessoas', JSON.stringify(pessoas));
+    mostrarToast('Salvo ✓');
+    render();
+  }
+
+  function mostrarToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(window._toastTimeout);
+    window._toastTimeout = setTimeout(() => t.classList.remove('show'), 1800);
+    atualizarStatusSalvo();
+  }
+
+  function atualizarStatusSalvo(){
+    const agora = new Date();
+    const hora = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('statusSalvo').textContent = `Salvo neste aparelho às ${hora}`;
+  }
+
+  function baixarBackup(){
+    const dados = { pessoas, precoRifa: PRECO_RIFA, exportadoEm: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const dataStr = new Date().toISOString().slice(0,10);
+    a.href = url;
+    a.download = `backup-rifas-${dataStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    mostrarToast('Backup baixado ✓');
+  }
+
+  function restaurarBackup(event){
+    const arquivo = event.target.files[0];
+    if(!arquivo) return;
+    const leitor = new FileReader();
+    leitor.onload = function(e){
+      try{
+        const dados = JSON.parse(e.target.result);
+        if(!Array.isArray(dados.pessoas)) throw new Error('formato inválido');
+        if(!confirm('Isso vai substituir os dados atuais pelos dados do backup. Continuar?')) return;
+        pessoas = dados.pessoas;
+        salvar();
+        mostrarToast('Backup restaurado ✓');
+      }catch(err){
+        alert('Arquivo de backup inválido.');
+      }
+      event.target.value = '';
+    };
+    leitor.readAsText(arquivo);
+  }
+
+  function formatMoeda(v){
+    return 'R$ ' + v.toFixed(2).replace('.', ',');
+  }
+
+  function adicionarPessoa(){
+    const nome = document.getElementById('inputNome').value.trim();
+    const qtd = parseInt(document.getElementById('inputQtd').value);
+    if(!nome || !qtd || qtd < 1){
+      alert('Preencha o nome e a quantidade de rifas.');
+      return;
+    }
+    pessoas.push({ id: Date.now(), nome, qtdDistribuida: qtd, qtdVendida: 0 });
+    document.getElementById('inputNome').value = '';
+    document.getElementById('inputQtd').value = '';
+    salvar();
+  }
+
+  function venderRifa(id){
+    const p = pessoas.find(p => p.id === id);
+    if(!p) return;
+    if(p.qtdVendida >= p.qtdDistribuida) return;
+    p.qtdVendida++;
+    salvar();
+  }
+
+  function editarPessoa(id){
+    const p = pessoas.find(p => p.id === id);
+    if(!p) return;
+    const novoNome = prompt('Nome:', p.nome);
+    if(novoNome === null) return;
+    const novaQtd = prompt('Quantidade distribuída:', p.qtdDistribuida);
+    if(novaQtd === null) return;
+    const qtdNum = parseInt(novaQtd);
+    if(!novoNome.trim() || !qtdNum || qtdNum < p.qtdVendida){
+      alert('Dados inválidos (a quantidade não pode ser menor que o já vendido).');
+      return;
+    }
+    p.nome = novoNome.trim();
+    p.qtdDistribuida = qtdNum;
+    salvar();
+  }
+
+  function excluirPessoa(id){
+    if(!confirm('Excluir esta pessoa e seu histórico de vendas?')) return;
+    pessoas = pessoas.filter(p => p.id !== id);
+    salvar();
+  }
+
+  function render(){
+    const lista = document.getElementById('lista');
+    const vazio = document.getElementById('vazio');
+    lista.innerHTML = '';
+
+    if(pessoas.length === 0){
+      vazio.style.display = 'block';
+    } else {
+      vazio.style.display = 'none';
+    }
+
+    let totDist = 0, totVend = 0;
+
+    pessoas.slice().sort((a,b) => a.nome.localeCompare(b.nome)).forEach(p => {
+      totDist += p.qtdDistribuida;
+      totVend += p.qtdVendida;
+      const restante = p.qtdDistribuida - p.qtdVendida;
+      const valor = p.qtdVendida * PRECO_RIFA;
+      const pct = p.qtdDistribuida > 0 ? (p.qtdVendida / p.qtdDistribuida * 100) : 0;
+
+      const el = document.createElement('div');
+      el.className = 'ticket';
+      el.innerHTML = `
+        <div class="stub"></div>
+        <div class="body">
+          <div class="top">
+            <span class="nome">${p.nome}</span>
+            <span class="valor">${formatMoeda(valor)}</span>
+          </div>
+          <div class="stats">
+            <span>Distr.: <b>${p.qtdDistribuida}</b></span>
+            <span>Vendidas: <b>${p.qtdVendida}</b></span>
+            <span>Restam: <b>${restante}</b></span>
+          </div>
+          <div class="bar"><div class="bar-fill" style="width:${pct}%"></div></div>
+          ${restante === 0 ? '<span class="esgotado">✔ TODAS VENDIDAS</span>' : ''}
+          <div class="actions">
+            <button class="btn-venda" onclick="venderRifa(${p.id})" ${restante === 0 ? 'disabled' : ''}>+1 Venda</button>
+            <button class="btn-editar" onclick="editarPessoa(${p.id})">Editar</button>
+            <button class="btn-excluir" onclick="excluirPessoa(${p.id})">Excluir</button>
+          </div>
+        </div>
+      `;
+      lista.appendChild(el);
+    });
+
+    document.getElementById('totDistribuidas').textContent = totDist;
+    document.getElementById('totVendidas').textContent = totVend;
+    document.getElementById('totRestantes').textContent = totDist - totVend;
+    document.getElementById('totArrecadado').textContent = formatMoeda(totVend * PRECO_RIFA);
+  }
+
+  render();
+</script>
+</body>
+</html>
