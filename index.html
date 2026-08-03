@@ -205,16 +205,28 @@
   }
   .ticket .actions{
     display:flex;
+    flex-wrap:wrap;
     gap:8px;
     margin-top:10px;
   }
   .ticket .actions button{
     flex:1;
+    min-width: 70px;
     border:none;
     border-radius:6px;
     padding:13px 0;
     font-size:20px;
     font-weight:600;
+  }
+  .btn-menos{
+    background: var(--paper-dark);
+    color: var(--ticket-red-dark);
+    flex: 0 0 auto !important;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+  .btn-menos:disabled{
+    color:#B9C7BC;
   }
   .btn-venda{
     background: var(--stub-green);
@@ -486,6 +498,14 @@ Garanta a sua! 🍀`;
     salvar();
   }
 
+  function diminuirVenda(id){
+    const p = pessoas.find(p => p.id === id);
+    if(!p) return;
+    if(p.qtdVendida <= 0) return;
+    p.qtdVendida--;
+    salvar();
+  }
+
   function editarPessoa(id){
     const p = pessoas.find(p => p.id === id);
     if(!p) return;
@@ -493,13 +513,17 @@ Garanta a sua! 🍀`;
     if(novoNome === null) return;
     const novaQtd = prompt('Quantidade distribuída:', p.qtdDistribuida);
     if(novaQtd === null) return;
+    const novaVendida = prompt('Quantidade vendida:', p.qtdVendida);
+    if(novaVendida === null) return;
     const qtdNum = parseInt(novaQtd);
-    if(!novoNome.trim() || !qtdNum || qtdNum < p.qtdVendida){
-      alert('Dados inválidos (a quantidade não pode ser menor que o já vendido).');
+    const vendidaNum = parseInt(novaVendida);
+    if(!novoNome.trim() || !qtdNum || vendidaNum < 0 || vendidaNum > qtdNum){
+      alert('Dados inválidos (a quantidade vendida não pode ser maior que a distribuída nem negativa).');
       return;
     }
     p.nome = novoNome.trim();
     p.qtdDistribuida = qtdNum;
+    p.qtdVendida = vendidaNum;
     salvar();
   }
 
@@ -548,6 +572,7 @@ Garanta a sua! 🍀`;
           ${restante === 0 ? '<span class="esgotado">✔ TODAS VENDIDAS</span>' : `<span class="falta">Falta receber: ${formatMoeda(valorFalta)}</span>`}
           <div class="actions">
             <button class="btn-venda" onclick="venderRifa(${p.id})" ${restante === 0 ? 'disabled' : ''}>+1 Venda</button>
+            <button class="btn-menos" onclick="diminuirVenda(${p.id})" ${p.qtdVendida === 0 ? 'disabled' : ''}>-1</button>
             <button class="btn-editar" onclick="editarPessoa(${p.id})">Editar</button>
             <button class="btn-excluir" onclick="excluirPessoa(${p.id})">Excluir</button>
           </div>
