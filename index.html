@@ -111,7 +111,7 @@
     border:none;
     border-radius:8px;
     background:#25D366;
-    color:#000;
+    color:#fff;
     font-size:16px;
     font-weight:700;
     box-shadow: 0 1px 3px rgba(0,0,0,0.15);
@@ -134,14 +134,15 @@
     gap:8px;
   }
   .add-form input{
+    min-width: 0;
     border:1px solid var(--line);
     border-radius:6px;
     padding:9px 10px;
     font-size:16px;
     background: var(--paper);
   }
-  .add-form input[name="nome"]{ flex:2; }
-  .add-form input[name="qtd"]{ flex:1; }
+  .add-form input[name="nome"]{ flex:2; width:100%; }
+  .add-form input[name="qtd"]{ flex:1; width:100%; }
   .add-form button{
     margin-top:10px;
     width:100%;
